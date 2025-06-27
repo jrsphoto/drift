@@ -1,4 +1,38 @@
-# DRIFT Architecture
+### Antenna Control Architecture
+
+#### Rotator Control Protocols
+- **Hamlib Integration**: Support for 100+ rotator models through Hamlib library
+- **Native Protocols**: Direct support for Yaesu GS-232, Alfa-SPID, and other common protocols
+- **Custom Controllers**: Arduino/Raspberry Pi based rotator interfaces
+- **Safety Systems**: Limit switches, collision avoidance, emergency stops
+
+#### Position Management
+```python
+class RotatorManager:
+    def __init__(self, config: RotatorConfig):
+        self.rotator = self._initialize_rotator(config)
+        self.position_cache = PositionCache()
+        self.calibration = AntennaCalibration(config.antenna_file)
+        self.safety_limits = SafetyLimits(config.limits)
+    
+    async def point_to_direction(self, azimuth: float, elevation: float) -> bool:
+        """Point antenna to specified direction with safety checks."""
+        if not self.safety_limits.is_safe_position(azimuth, elevation):
+            raise UnsafePositionError(f"Position {azimuth},{elevation} violates safety limits")
+        
+        await self.rotator.set_position(azimuth, elevation)
+        return await self._verify_position(azimuth, elevation, tolerance=2.0)
+    
+    async def get_antenna_gain(self, frequency: float, azimuth: float, elevation: float) -> float:
+        """Get antenna gain for specified frequency and direction."""
+        return self.calibration.get_gain(frequency, azimuth, elevation)
+```
+
+#### Coordinated Pointing
+- **Multi-node synchronization**: Coordinate antenna pointing across distributed nodes
+- **Path calculations**: Great circle bearings for long-distance coordination
+- **Time-synchronized pointing**: Ensure antennas point at same time across network
+- **Dynamic tracking**: Follow moving targets (satellites, aircraft)# DRIFT Architecture
 
 This document outlines the system architecture for DRIFT (Distributed RF Intelligence Network).
 
@@ -26,21 +60,24 @@ DRIFT implements a distributed computing model where Software Defined Radio (SDR
                           └─────┬─────┘
                                 │
 ┌─────────────────────────────────────────────────────────────┐
-│                      NODE AGENT LAYER                      │
+│                      NODE AGENT LAYER                       │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
 │  │ Task Executor   │  │ Device Manager  │  │ Sync Manager │ │
 │  └─────────────────┘  └─────────────────┘  └──────────────┘ │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐ │
-│  │ Data Collector  │  │ Health Monitor  │  │ Config Mgmt  │ │
+│  │ Data Collector  │  │ Rotator Manager │  │ Config Mgmt  │ │
 │  └─────────────────┘  └─────────────────┘  └──────────────┘ │
 └─────────────────────────────────────────────────────────────┘
                                 │
 ┌─────────────────────────────────────────────────────────────┐
-│                    HARDWARE LAYER                          │
+│                    HARDWARE LAYER                           │
 │  ┌──────────────┐  ┌──────────────┐  ┌─────────────────────┐ │
-│  │ SDR Devices  │  │ Clock Sync   │  │ Compute Resources   │ │
-│  │ (SoapySDR)   │  │ (GPS/PTP)    │  │ (CPU/GPU/Storage)   │ │
+│  │ SDR Devices  │  │ Clock Sync   │  │ Antenna Rotators    │ │
+│  │ (SoapySDR)   │  │ (GPS/PTP)    │  │ (Hamlib/Custom)     │ │
 │  └──────────────┘  └──────────────┘  └─────────────────────┘ │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │              Compute Resources (CPU/GPU/Storage)        │ │
+│  └─────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -82,9 +119,17 @@ Each node runs an agent responsible for local device management and job executio
 - Implements device health monitoring
 - Handles device-specific optimizations
 
+#### Rotator Manager
+- Controls antenna positioning systems via Hamlib or custom protocols
+- Manages calibration and position feedback
+- Coordinates antenna movement with RF measurements
+- Implements safety limits and collision avoidance
+- Tracks antenna patterns and gain characteristics
+
 #### Task Executor
 - Receives job assignments from coordinator
 - Configures devices according to job parameters
+- Coordinates antenna positioning for directional measurements
 - Executes spectrum scans, data collection, or signal processing
 - Handles multi-device coordination for complex jobs
 - Reports job progress and results
@@ -100,17 +145,19 @@ Each node runs an agent responsible for local device management and job executio
 
 ```
 Job Submission → Resource Allocation → Node Assignment → 
-Task Execution → Data Collection → Aggregation → Results
+Antenna Positioning → Task Execution → Data Collection → 
+Aggregation → Results
 ```
 
 #### Data Collection Pipeline
-1. **Local Collection**: Node agents collect raw RF data
-2. **Local Processing**: Initial filtering, FFT, or feature extraction
-3. **Data Packaging**: Format data with metadata (SigMF standard)
-4. **Transmission**: Send processed data to coordinator
-5. **Aggregation**: Coordinator combines data from multiple nodes
-6. **Storage**: Persistent storage with indexing for analysis
-7. **Visualization**: Web dashboard or API access to results
+1. **Antenna Positioning**: Rotators move to specified azimuth/elevation
+2. **Local Collection**: Node agents collect raw RF data with directional context
+3. **Local Processing**: Initial filtering, FFT, or feature extraction with spatial metadata
+4. **Data Packaging**: Format data with metadata (SigMF standard + antenna position)
+5. **Transmission**: Send processed data to coordinator
+6. **Aggregation**: Coordinator combines data from multiple nodes and directions
+7. **Storage**: Persistent storage with indexing for analysis
+8. **Visualization**: Web dashboard or API access to results with directional overlays
 
 ## Synchronization Architecture
 
@@ -184,6 +231,7 @@ Task Execution → Data Collection → Aggregation → Results
 ### Core Technologies
 - **Language**: Python 3.8+ for primary implementation
 - **SDR Abstraction**: SoapySDR for hardware interface
+- **Rotator Control**: Hamlib for antenna rotator interface
 - **Web Framework**: FastAPI for REST API and web interface
 - **Database**: PostgreSQL for metadata, InfluxDB for time-series data
 - **Message Queue**: Redis for job queuing and caching
@@ -205,6 +253,8 @@ Task Execution → Data Collection → Aggregation → Results
 - **Edge Computing**: Local AI processing on powerful nodes
 - **Mesh Networking**: Peer-to-peer coordination for resilient operation
 - **Cloud Integration**: Hybrid cloud/edge deployment models
+- **Adaptive Beamforming**: Coordinated antenna steering for optimal reception
+- **Automatic Target Tracking**: AI-driven tracking of moving RF sources
 
 ### Research Directions
 - **Adaptive Sampling**: Dynamic adjustment of sampling parameters
