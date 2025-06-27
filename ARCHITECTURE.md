@@ -1,3 +1,13 @@
+# DRIFT Architecture
+
+This document outlines the system architecture for DRIFT (Distributed RF Intelligence Network).
+
+## System Overview
+
+DRIFT implements a distributed computing model where Software Defined Radio (SDR) devices are treated as compute resources that can be dynamically allocated to RF processing jobs. The system is designed to scale from a few local nodes to hundreds of geographically distributed radios.
+
+## Core Architecture
+
 ### Antenna Control Architecture
 
 #### Rotator Control Protocols
