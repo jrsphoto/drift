@@ -88,6 +88,7 @@ Add advanced features for practical spectrum monitoring applications.
   - Full ADALM-Pluto integration
   - Airspy device support
   - HermesLite 2 integration (receive-only)
+  - Basic antenna rotator support (manual positioning)
   - Advanced device configuration options
 
 - [ ] **Data Processing Pipeline**
@@ -117,16 +118,22 @@ Add advanced features for practical spectrum monitoring applications.
 Enable sophisticated RF measurement campaigns and research applications.
 
 ### Key Deliverables
-- [ ] **Transmit Capabilities**
+- [ ] **Advanced RF Capabilities**
   - HermesLite 2 transmit support
   - Coordinated transmit/receive testing
   - Beacon network functionality
   - Amateur radio license compliance
 
+- [ ] **Directional Capabilities**
+  - Automated antenna rotator control
+  - Direction finding algorithms
+  - Coordinated beam steering across nodes
+  - Antenna pattern calibration and compensation
+
 - [ ] **Coherent Processing**
   - Phase coherent operation
-  - Direction finding algorithms
-  - Beamforming capabilities
+  - Advanced beamforming capabilities
+  - Multi-node virtual antenna arrays
   - Advanced synchronization
 
 - [ ] **Geolocation Services**
@@ -143,9 +150,9 @@ Enable sophisticated RF measurement campaigns and research applications.
 
 ### Success Criteria
 - Demonstrate coordinated transmit/receive measurements
-- Implement basic direction finding
-- Support coherent multi-node processing
-- Enable amateur radio research applications
+- Implement automated direction finding with rotator control
+- Support coherent multi-node processing with beam steering
+- Enable amateur radio research applications with directional antennas
 
 ## Phase 4 - Production Ready 🎯
 
@@ -254,6 +261,7 @@ Enable cutting-edge RF research and development.
 ### Current Needs (Phase 0-1)
 - **System Architects**: Help refine the overall architecture
 - **SDR Experts**: Advice on hardware integration and RF best practices
+- **Antenna Engineers**: Expertise in rotator control and directional antenna systems
 - **DevOps Engineers**: Container and deployment automation expertise
 - **Frontend Developers**: Web dashboard and visualization development
 - **Technical Writers**: Documentation and user guides
