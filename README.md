@@ -16,6 +16,7 @@ Think of it as "Kubernetes for SDRs" - where you can dynamically allocate radio 
 - **Coherent Operation**: Synchronize multiple radios using GPS disciplined oscillators or precision timing
 - **Hardware Agnostic**: Support multiple SDR platforms through unified APIs
 - **Geographic Distribution**: Coordinate radios across different locations for wide-area coverage
+- **Directional Capabilities**: Automated antenna rotator control for direction finding and beamforming
 - **Application Agnostic**: Framework supports various RF applications from spectrum monitoring to propagation studies
 - **Web-based Coordination**: Centralized scheduling and monitoring interface
 - **Automated Deployment**: Infrastructure-as-code approach for easy node deployment
@@ -23,10 +24,13 @@ Think of it as "Kubernetes for SDRs" - where you can dynamically allocate radio 
 ## Use Cases
 
 - **Distributed Spectrum Monitoring**: Coordinate spectrum scans across multiple geographic locations
-- **Propagation Studies**: Synchronized transmit/receive testing across wide areas
-- **Interference Hunting**: Triangulate interference sources using multiple receivers
-- **Band Planning**: Analyze spectrum usage patterns across different regions
-- **Emergency Communications**: Rapid deployment of RF monitoring networks
+- **Direction Finding & Triangulation**: Automated antenna steering for precise signal source location
+- **Propagation Studies**: Synchronized transmit/receive testing with directional antennas across wide areas
+- **Interference Hunting**: Triangulate interference sources and null steering for rejection
+- **Coordinated Beamforming**: Virtual antenna arrays using geographically distributed nodes
+- **HF Propagation Research**: Path-specific measurements with steerable antennas
+- **Emergency Communications**: Rapid deployment of RF monitoring networks with automatic beacon location
+- **Band Planning**: Analyze spectrum usage patterns across different regions and directions
 - **Research & Development**: Academic and commercial RF research requiring distributed measurements
 
 ## Architecture Overview
@@ -42,6 +46,7 @@ DRIFT follows a client-server architecture with three main components:
 
 ### Node Agents (Clients)
 - Local SDR device management
+- Antenna rotator control and positioning
 - Job execution and data collection
 - Clock synchronization management
 - Hardware abstraction layer
@@ -74,7 +79,10 @@ python drift-coordinator.py --config coordinator-config.yaml
 
 ## Hardware Support
 
-DRIFT aims to support a wide range of SDR hardware through the SoapySDR abstraction layer:
+DRIFT aims to support a wide range of SDR hardware and antenna systems:
+
+### SDR Hardware
+Supported through the SoapySDR abstraction layer:
 
 - **HackRF One**: Wideband coverage, fast spectrum sweeping
 - **ADALM-Pluto**: High-resolution narrowband analysis
@@ -84,6 +92,13 @@ DRIFT aims to support a wide range of SDR hardware through the SoapySDR abstract
 - **HermesLite 2**: HF coverage with transmit capabilities
 - **BladeRF**: High-performance transceiver
 - **And many more via SoapySDR**
+
+### Antenna Rotator Systems
+- **Yaesu GS-232 Protocol**: Industry standard rotator control
+- **Alfa-SPID**: Professional grade rotators
+- **Hamlib Compatible**: Wide range of rotator hardware
+- **Custom Controllers**: Arduino/Raspberry Pi based systems
+- **Position Feedback**: Encoder-based accurate positioning
 
 ## Project Status
 
